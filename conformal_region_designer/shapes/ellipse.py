@@ -151,7 +151,7 @@ def objective_func_cma_es_ellipse_arbitrary_dim_multi_ellipse(x, *args):
     return vol
 
 
-class EllipseTemplate(ShapeTemplate):
+class Ellipse(ShapeTemplate):
     def __init__(self) -> None:
         super().__init__()
         self.Q = None
