@@ -2053,20 +2053,6 @@ files = [
 plugins = ["importlib-metadata"]
 
 [[package]]
-name = "pyhull"
-version = "2015.2.1"
-description = "A Python wrapper to Qhull (http://www.qhull.org/) for the computation of the convex hull, Delaunay triangulation and Voronoi diagram"
-optional = false
-python-versions = "*"
-files = [
-    {file = "pyhull-2015.2.1-cp37-cp37m-macosx_10_7_x86_64.whl", hash = "sha256:a2374c6a47be1f5fa065850c0418eda35e86ee88c415ecfc5b010eec098522c1"},
-    {file = "pyhull-2015.2.1.tar.gz", hash = "sha256:d2ff0aa3298b548287587609a24f4e2aae7f7b8b1df152a90cd313260abc3a24"},
-]
-
-[package.dependencies]
-numpy = "*"
-
-[[package]]
 name = "pyparsing"
 version = "3.1.1"
 description = "pyparsing module - Classes and methods to define and execute parsing grammars"
@@ -2961,4 +2947,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.10,<3.13"
-content-hash = "fcbe0e8f327a27d1f88a2b731319eb4cf6f687dd7d6519b6bb052743f0ceae1f"
+content-hash = "8e3a35339a5a8847504de91c5f88665e1d38a58252d128251d8b032fc3520df4"
