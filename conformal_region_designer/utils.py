@@ -11,4 +11,5 @@ def conformalized_quantile(n, delta):
     Returns:
         float: Conformalized quantile
     """
+    assert 0 < delta < 1
     return ((n + 1.0) * (delta)) / float(n)
