@@ -31,13 +31,12 @@ def computeCPEllipseMatrixManyEllipse(residuals, Q_matrices, ellipse_centers, de
     R_vals.sort()
     R_vals.append(max(R_vals))
 
-    ind_to_ret = math.ceil(len(R_vals) * (1 - delta))
+    ind_to_ret = min(math.ceil(len(R_vals) * (1 - delta)), len(R_vals) - 1)
     return R_vals[ind_to_ret].item()
 
 
 def callCMAESMatrixManyEllipse(residuals, delta, num_ellipse, ellipse_centers=None):
     ## add in cma example
-    # residuals = np.array(residuals)
     dims = residuals.shape[1]
     args_cma = [residuals, delta, dims, num_ellipse, ellipse_centers]
 
@@ -161,11 +160,33 @@ class Ellipse(ShapeTemplate):
         delta = 0.0
         num_ellipse = 1
         self.Q, self.center = callCMAESMatrixManyEllipse(X, delta, num_ellipse)
+        self.center = self.center[0]
+        self.Q = self.Q[0]
 
     def score_points(self, X):
-        return np.array(
-            [np.matmul(np.matmul(x - self.center, self.Q), x - self.center) for x in X]
+        score =  np.array(
+            [(x - self.center).T @ self.Q @ (x - self.center) for x in X]
         )
+        score = score - 1  # This is because the standard ellipse eq is leq 1.
+        return score
 
     def conformalize(self, delta, calibration_data):
-        pass
+        raise NotImplementedError("Not implemented yet")
+
+    def adjust_shape(self, score_margin):
+        self.Q /= score_margin
+
+    def plot(self, ax):
+        if self.Q.shape[0] == 3:
+            raise NotImplementedError("3d plotting not implemented yet")
+        else:
+            # Plot the ellipse in 2d
+            eigenvalues, eigenvectors = np.linalg.eig(self.Q)
+            theta = np.linspace(0, 2 * np.pi, 1000)
+            ellipsis = (1 / np.sqrt(eigenvalues[None, :]) * eigenvectors) @ [
+                np.sin(theta),
+                np.cos(theta),
+            ]
+            # print(ellipsis.shape)
+            # print(ellipsis[:,0:10])
+            ax.plot(ellipsis[0, :] + self.center[0], ellipsis[1, :] + self.center[1], color='black')
