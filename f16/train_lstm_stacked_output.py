@@ -15,7 +15,7 @@ from sklearn.preprocessing import MinMaxScaler
 
 from myLSTM import LSTMNew
 
-useTrainedModel = False
+useTrainedModel = True
 
 
 
@@ -258,6 +258,11 @@ def main():
     plt.ylabel("Pitch error")
     plt.savefig(image_dir + "scatterPlotTestErrs")
     plt.clf()
+
+    residuals_save_file = data_folder + "/testResiduals/"
+    os.makedirs(residuals_save_file,exist_ok=True)
+    with open(residuals_save_file + "residuals.pkl","wb") as f:
+        pickle.dump(all_errs_one_point,f)
             
         
         # # print(_sample_predict_plot.shape)
