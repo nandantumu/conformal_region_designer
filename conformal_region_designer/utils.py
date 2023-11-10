@@ -1,4 +1,4 @@
-import numpy
+import numpy as np
 
 
 def conformalized_quantile(n, delta):
@@ -12,4 +12,4 @@ def conformalized_quantile(n, delta):
         float: Conformalized quantile
     """
     assert 0 < delta < 1
-    return ((n + 1.0) * (delta)) / float(n)
+    return np.ceil((n + 1.0) * (delta)) / float(n)

@@ -31,7 +31,7 @@ class ConvexHullTemplate(ShapeTemplate):
         self.adjust_shape(inflation)
         
     def adjust_shape(self, score_margin):
-        self.hyp_b += score_margin
+        self.hyp_b -= score_margin
     
     def plot(self, ax):
         """Convert the halfspace equations to a halfspace intersection, and plot the vertices"""

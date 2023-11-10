@@ -39,7 +39,7 @@ class ConformalRegion:
         for i in range(len(self.shapes)):
             self.normalizing_constant[i] = np.max(real_scores[shape_idx == i])
 
-    def conformalize(self, Z_cal: np.ndarray):
+    def conformalize(self, Z_cal: np.ndarray, debug=False):
         conf_delta = conformalized_quantile(len(Z_cal), self.delta)
         scores = np.zeros((len(self.shapes), Z_cal.shape[0]))
         for i, shape in enumerate(self.shapes):
@@ -47,7 +47,7 @@ class ConformalRegion:
         real_scores = np.min(scores, axis=0)
         shape_idx = np.argmin(scores, axis=0)
         target_score = np.quantile(real_scores, conf_delta)
-        print(f"Target score: {target_score}")
+        if debug: print(f"Target score: {target_score}")
         for i, shape in enumerate(self.shapes):
             shape.adjust_shape(target_score*self.normalizing_constant[i])
 

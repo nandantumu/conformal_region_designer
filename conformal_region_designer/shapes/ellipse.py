@@ -162,11 +162,13 @@ class Ellipse(ShapeTemplate):
         self.Q, self.center = callCMAESMatrixManyEllipse(X, delta, num_ellipse)
         self.center = self.center[0]
         self.Q = self.Q[0]
+        self.score_margin = 1.0
 
     def score_points(self, X):
         score =  np.array(
-            [(x - self.center).T @ self.Q @ (x - self.center) for x in X]
+            [(x - self.center).T @ (self.Q/self.score_margin) @ (x - self.center) for x in X]
         )
+        assert(np.all(score >= 0))
         score = score - 1  # This is because the standard ellipse eq is leq 1.
         return score
 
@@ -174,14 +176,15 @@ class Ellipse(ShapeTemplate):
         raise NotImplementedError("Not implemented yet")
 
     def adjust_shape(self, score_margin):
-        self.Q /= score_margin
+        self.score_margin = self.score_margin*(score_margin+1.0)
+        #assert(self.score_margin >= 0)
 
-    def plot(self, ax):
+    def plot(self, ax, **kwargs):
         if self.Q.shape[0] == 3:
             raise NotImplementedError("3d plotting not implemented yet")
         else:
             # Plot the ellipse in 2d
-            eigenvalues, eigenvectors = np.linalg.eig(self.Q)
+            eigenvalues, eigenvectors = np.linalg.eig(self.Q/self.score_margin)
             theta = np.linspace(0, 2 * np.pi, 1000)
             ellipsis = (1 / np.sqrt(eigenvalues[None, :]) * eigenvectors) @ [
                 np.sin(theta),
@@ -189,4 +192,5 @@ class Ellipse(ShapeTemplate):
             ]
             # print(ellipsis.shape)
             # print(ellipsis[:,0:10])
-            ax.plot(ellipsis[0, :] + self.center[0], ellipsis[1, :] + self.center[1], color='black')
+            ax.plot(ellipsis[0, :] + self.center[0], ellipsis[1, :] + self.center[1], color='black', **kwargs)
+
