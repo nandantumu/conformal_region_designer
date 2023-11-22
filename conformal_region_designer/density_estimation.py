@@ -11,7 +11,7 @@ class KDE(DensityEstimator):
         self.kde = None
         self.grid_size = grid_size
 
-    def fit(self, X):
+    def fit(self, X, delta):
         """
         Fit the density estimator to the data and save the range of the data
 
@@ -21,7 +21,16 @@ class KDE(DensityEstimator):
         self.kde = KernelDensity(bandwidth=self.bandwidth, kernel=self.kernel)
         self.kde.fit(X)
 
-        # We now need to store the range of the data
+        self.delta = delta
+
+        # # We should also remove the outliers from the min/max
+        # self.iqr = np.quantile(X, 0.75, axis=0) - np.quantile(X, 0.25, axis=0)
+        # self.min_quantile = np.quantile(X, 0.25, axis=0) - 4 * self.iqr
+        # self.max_quantile = np.quantile(X, 0.75, axis=0) + 4 * self.iqr
+
+        # # We now need to store the range of the data
+        # self.min = np.maximum(np.min(X, axis=0), self.min_quantile)
+        # self.max = np.minimum(np.max(X, axis=0), self.max_quantile)
         self.min = np.min(X, axis=0)
         self.max = np.max(X, axis=0)
 
@@ -55,6 +64,10 @@ class KDE(DensityEstimator):
         grid_weight = grid_weight[sorted_indices]
         # Calculate the cumulative weight
         cum_weight = np.cumsum(np.exp(grid_weight))
+        print(f"Total Weight Sum: {cum_weight[-1]}")
+        # We may run into an issue, where the cumulative weight is not 1.0 due to numerical issues
+        # We can fix this by renormalizing the cumulative weight
+        cum_weight /= cum_weight[-1]
         # Find the first grid point with weight at least delta
         idx = np.argmax(cum_weight >= delta)
         # Return the grid points with weight at least delta

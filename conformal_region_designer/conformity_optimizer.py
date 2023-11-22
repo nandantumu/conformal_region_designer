@@ -18,7 +18,7 @@ class ConformalRegion:
         self.delta = delta
 
     def fit(self, Z_train: np.ndarray):
-        self.de.fit(Z_train)
+        self.de.fit(Z_train, self.delta)
         print("Generating density points")
         self.density_points = self.de.generate_points(self.delta)
         print("Fitting Clusters")

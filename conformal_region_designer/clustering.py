@@ -13,6 +13,8 @@ class MeanShiftClustering(Clustering):
     def fit(self, X):
         if self.bandwidth is None:
             self.bandwidth = estimate_bandwidth(X)
+            if self.bandwidth == 0:
+                self.bandwidth = 1e-10
         ms = MeanShift(bandwidth=self.bandwidth, n_jobs=8)
         ms.fit(X)
         self.cluster_centers_ = ms.cluster_centers_
