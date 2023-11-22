@@ -1,6 +1,4 @@
 import math
-import pickle
-import random
 import time
 
 import cma
@@ -179,7 +177,7 @@ class Ellipse(ShapeTemplate):
         self.score_margin = self.score_margin*(score_margin+1.0)
         #assert(self.score_margin >= 0)
 
-    def plot(self, ax, **kwargs):
+    def plot(self, ax, offset_coords=None, **kwargs):
         if self.Q.shape[0] == 3:
             raise NotImplementedError("3d plotting not implemented yet")
         else:
@@ -192,5 +190,12 @@ class Ellipse(ShapeTemplate):
             ]
             # print(ellipsis.shape)
             # print(ellipsis[:,0:10])
-            ax.plot(ellipsis[0, :] + self.center[0], ellipsis[1, :] + self.center[1], color='black', **kwargs)
+            if offset_coords is None:
+                offset_coords = np.zeros(2)
+            ax.plot(
+                ellipsis[0, :] + self.center[0] + offset_coords[0],
+                ellipsis[1, :] + self.center[1] + offset_coords[1],
+                color="black",
+                **kwargs
+            )
 

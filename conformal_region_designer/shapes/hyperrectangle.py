@@ -36,51 +36,53 @@ class HyperRectangle(ShapeTemplate):
     def volume(self):
         return np.prod(self.max - self.min)
 
-    def plot(self, ax):
+    def plot(self, ax, offset_coords=None, **kwargs):
         """
         Plot the hyperrectangle in 2d and 3d
         """
+        if offset_coords is None:
+            offset_coords = np.zeros(len(self.min))
         if len(self.min) == 2:
             ax.plot(
-                [self.min[0], self.min[0], self.max[0], self.max[0], self.min[0]],
-                [self.min[1], self.max[1], self.max[1], self.min[1], self.min[1]],
+                np.array([self.min[0], self.min[0], self.max[0], self.max[0], self.min[0]])+offset_coords[0],
+                np.array([self.min[1], self.max[1], self.max[1], self.min[1], self.min[1]])+offset_coords[1],
                 color="black",
             )
         elif len(self.min) == 3:
             ax.plot(
-                [self.min[0], self.min[0], self.max[0], self.max[0], self.min[0]],
-                [self.min[1], self.max[1], self.max[1], self.min[1], self.min[1]],
-                [self.min[2], self.min[2], self.min[2], self.min[2], self.min[2]],
+                np.array([self.min[0], self.min[0], self.max[0], self.max[0], self.min[0]])+offset_coords[0],
+                np.array([self.min[1], self.max[1], self.max[1], self.min[1], self.min[1]])+offset_coords[1],
+                np.array([self.min[2], self.min[2], self.min[2], self.min[2], self.min[2]])+offset_coords[2],
                 color="black",
             )
             ax.plot(
-                [self.min[0], self.min[0], self.max[0], self.max[0], self.min[0]],
-                [self.min[1], self.max[1], self.max[1], self.min[1], self.min[1]],
-                [self.max[2], self.max[2], self.max[2], self.max[2], self.max[2]],
+                np.array([self.min[0], self.min[0], self.max[0], self.max[0], self.min[0]])+offset_coords[0],
+                np.array([self.min[1], self.max[1], self.max[1], self.min[1], self.min[1]])+offset_coords[1],
+                np.array([self.max[2], self.max[2], self.max[2], self.max[2], self.max[2]])+offset_coords[2],
                 color="black",
             )
             ax.plot(
-                [self.min[0], self.min[0]],
-                [self.min[1], self.min[1]],
-                [self.min[2], self.max[2]],
+                np.array([self.min[0], self.min[0]])+offset_coords[0],
+                np.array([self.min[1], self.min[1]])+offset_coords[1],
+                np.array([self.min[2], self.max[2]])+offset_coords[2],
                 color="black",
             )
             ax.plot(
-                [self.min[0], self.min[0]],
-                [self.max[1], self.max[1]],
-                [self.min[2], self.max[2]],
+                np.array([self.min[0], self.min[0]])+offset_coords[0],
+                np.array([self.max[1], self.max[1]])+offset_coords[1],
+                np.array([self.min[2], self.max[2]])+offset_coords[2],
                 color="black",
             )
             ax.plot(
-                [self.max[0], self.max[0]],
-                [self.min[1], self.min[1]],
-                [self.min[2], self.max[2]],
+                np.array([self.max[0], self.max[0]])+offset_coords[0],
+                np.array([self.min[1], self.min[1]])+offset_coords[1],
+                np.array([self.min[2], self.max[2]])+offset_coords[2],
                 color="black",
             )
             ax.plot(
-                [self.max[0], self.max[0]],
-                [self.max[1], self.max[1]],
-                [self.min[2], self.max[2]],
+                np.array([self.max[0], self.max[0]])+offset_coords[0],
+                np.array([self.max[1], self.max[1]])+offset_coords[1],
+                np.array([self.min[2], self.max[2]])+offset_coords[2],
                 color="black",
             )
         else:

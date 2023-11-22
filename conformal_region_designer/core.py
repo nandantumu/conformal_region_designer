@@ -64,6 +64,6 @@ class ShapeTemplate(ABC):
         """Adjust the shape (inflate or deflate) based on the score margin"""
         pass
 
-    def plot(self, ax):
+    def plot(self, ax, offset_coords=None):
         """Plot the shape"""
         pass

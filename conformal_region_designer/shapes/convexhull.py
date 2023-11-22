@@ -51,8 +51,10 @@ class ConvexHullTemplate(ShapeTemplate):
         self.hull = CHull(self.hs.intersections)
         self.hull.close()
 
-    def plot(self, ax):
+    def plot(self, ax, offset_coords=None, **kwargs):
         """Convert the halfspace equations to a halfspace intersection, and plot the vertices"""
+        if offset_coords is None:
+            offset_coords = np.zeros(self.hyp_a.shape[1])
         if self.hyp_a.shape[1] == 3:
             # Plot the convex hull in 3d
             raise NotImplementedError("3d plotting not implemented yet")
@@ -68,4 +70,4 @@ class ConvexHullTemplate(ShapeTemplate):
             # Add the first vertex to the end to close the polygon
             vertices = np.vstack([vertices, vertices[0]])
             # Plot the vertices
-            ax.plot(vertices[:, 0], vertices[:, 1], color="black")
+            ax.plot(vertices[:, 0]+offset_coords[0], vertices[:, 1]+offset_coords[1], color="black")

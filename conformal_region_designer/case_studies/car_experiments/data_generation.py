@@ -18,10 +18,11 @@ DECELERATE = np.array([0.0, -ACCEL_VALUE])
 STRAIGHT_ACCEL = [ACCELERATE]*5 + [COAST]*15
 STRAIGHT_ACCEL_LEFT = [ACCELERATE]*5 + [ACCELERATE + LEFT]*15
 STRAIGHT_ACCEL_RIGHT = [ACCELERATE]*5 + [ACCELERATE + RIGHT]*15
+STRAIGHT_ACCEL_FORWARD = [ACCELERATE]*5 + [ACCELERATE*1.5]*15
 
 # Randomness
 SEED = 42
-STD_DEVS = [TURN_VALUE/2.5, ACCEL_VALUE/2.5]
+STD_DEVS = [TURN_VALUE/2, ACCEL_VALUE/2]
 
 
 class ActionPolicy:
@@ -65,13 +66,17 @@ def create_dataset(action_policy: ActionPolicy, initial_conditions: np.ndarray, 
 
 def generate_calibration_dataset(num_rollouts: int) -> np.ndarray:
     action_policy = ActionPolicy(STRAIGHT_ACCEL_LEFT, STD_DEVS)
-    dataset = create_dataset(action_policy, INITIAL_CONDITIONS, num_rollouts//2)
+    dataset = create_dataset(action_policy, INITIAL_CONDITIONS, num_rollouts//3)
 
     action_policy = ActionPolicy(STRAIGHT_ACCEL_RIGHT, STD_DEVS)
-    dataset_2 = create_dataset(action_policy, INITIAL_CONDITIONS, num_rollouts//2)
+    dataset_2 = create_dataset(action_policy, INITIAL_CONDITIONS, num_rollouts//3)
+
+
+    action_policy = ActionPolicy(STRAIGHT_ACCEL_FORWARD, STD_DEVS)
+    dataset_3 = create_dataset(action_policy, INITIAL_CONDITIONS, num_rollouts - 2*(num_rollouts//3))
 
     # Combine the two datasets on the first axis
-    dataset = np.concatenate((dataset, dataset_2), axis=0)
+    dataset = np.concatenate((dataset, dataset_2, dataset_3), axis=0)
     x = dataset[:, :5, :]
     y = dataset[:, 5:, :]
     return (x, y)
