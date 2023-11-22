@@ -33,6 +33,9 @@ class HyperRectangle(ShapeTemplate):
         self.min -= score_margin
         self.max += score_margin
 
+    def volume(self):
+        return np.prod(self.max - self.min)
+
     def plot(self, ax):
         """
         Plot the hyperrectangle in 2d and 3d

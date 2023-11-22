@@ -18,6 +18,14 @@ class KDE(DensityEstimator):
         Args:
             X (np.ndarray): Data to fit the density estimator to, shape (n_samples, n_features)
         """
+        if self.bandwidth == "scott":
+            self.bandwidth = X.shape[0] ** (-1 / (X.shape[1] + 4))
+            self.bandwidth /= 3
+        elif self.bandwidth == "silverman":
+            self.bandwidth = (X.shape[0] * (X.shape[1] + 2) / 4) ** (
+                    -1 / (X.shape[1] + 4)
+            )
+            self.bandwidth /= 3
         self.kde = KernelDensity(bandwidth=self.bandwidth, kernel=self.kernel)
         self.kde.fit(X)
 
@@ -72,3 +80,14 @@ class KDE(DensityEstimator):
         idx = np.argmax(cum_weight >= delta)
         # Return the grid points with weight at least delta
         return grid[: idx + 1]
+
+
+class NoOpDensityEstimator(DensityEstimator):
+    def __init__(self) -> None:
+        super().__init__()
+
+    def fit(self, X):
+        self.data = X
+
+    def generate_points(self, delta) -> np.ndarray:
+        return self.data
