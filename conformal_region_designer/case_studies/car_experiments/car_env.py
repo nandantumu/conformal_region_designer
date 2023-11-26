@@ -1,7 +1,7 @@
 import numpy as np
 
 # Constants
-L = 2.5  # Wheelbase length
+L = 1.0  # Wheelbase length
 DT = 0.1  # Time step
 
 class CarEnvironment:

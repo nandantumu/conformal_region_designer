@@ -1,3 +1,3 @@
-from .ellipse import Ellipse
-from .hyperrectangle import HyperRectangle
+from .ellipse import EllipsoidTemplate
+from .hyperrectangle import HyperrectangleTemplate
 from .convexhull import ConvexHullTemplate

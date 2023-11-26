@@ -4,7 +4,7 @@ from ..core import ShapeTemplate
 from ..utils import conformalized_quantile
 
 
-class HyperRectangle(ShapeTemplate):
+class HyperrectangleTemplate(ShapeTemplate):
     def __init__(self) -> None:
         super().__init__()
         self.min = None
@@ -47,6 +47,7 @@ class HyperRectangle(ShapeTemplate):
                 np.array([self.min[0], self.min[0], self.max[0], self.max[0], self.min[0]])+offset_coords[0],
                 np.array([self.min[1], self.max[1], self.max[1], self.min[1], self.min[1]])+offset_coords[1],
                 color="black",
+                **kwargs
             )
         elif len(self.min) == 3:
             ax.plot(

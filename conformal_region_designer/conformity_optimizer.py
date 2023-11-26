@@ -2,6 +2,7 @@
 This file contains an implementation of the overall orchestrator that creates regions.
 
 """
+from typing import Union
 import numpy as np
 
 from .core import Clustering, DensityEstimator, ShapeTemplate
@@ -10,10 +11,38 @@ from .utils import conformalized_quantile
 
 class ConformalRegion:
     def __init__(
-        self, de: DensityEstimator, cl: Clustering, st: type[ShapeTemplate], delta=0.95
+        self, 
+        de: Union[DensityEstimator, str] = 'kde', 
+        cl: Union[Clustering, str] = 'mean_shift', 
+        st: Union[type[ShapeTemplate], str] = 'hyperrectangle', 
+        delta=0.95
     ) -> None:
+        if isinstance(de, str):
+            if de == 'kde':
+                from .density_estimation import KDE
+                de = KDE()
+            else:
+                raise ValueError(f"Unknown density estimator {de}")
         self.de = de
+        if isinstance(cl, str):
+            if cl == 'mean_shift':
+                from .clustering import MeanShift
+                cl = MeanShift()
+            else:
+                raise ValueError(f"Unknown clustering algorithm {cl}")
         self.cl = cl
+        if isinstance(st, str):
+            if st == 'hyperrectangle':
+                from .shapes import HyperrectangleTemplate
+                st = HyperrectangleTemplate
+            elif st == 'convexhull':
+                from .shapes import ConvexHullTemplate
+                st = ConvexHullTemplate
+            elif st == 'ellipse':
+                from .shapes import EllipsoidTemplate
+                st = EllipsoidTemplate
+            else:
+                raise ValueError(f"Unknown shape template {st}")
         self.st = st
         self.delta = delta
 

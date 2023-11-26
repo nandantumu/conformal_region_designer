@@ -70,4 +70,4 @@ class ConvexHullTemplate(ShapeTemplate):
             # Add the first vertex to the end to close the polygon
             vertices = np.vstack([vertices, vertices[0]])
             # Plot the vertices
-            ax.plot(vertices[:, 0]+offset_coords[0], vertices[:, 1]+offset_coords[1], color="black")
+            ax.plot(vertices[:, 0]+offset_coords[0], vertices[:, 1]+offset_coords[1], color="black", **kwargs)

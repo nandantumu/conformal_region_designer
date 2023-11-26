@@ -148,7 +148,7 @@ def objective_func_cma_es_ellipse_arbitrary_dim_multi_ellipse(x, *args):
     return vol
 
 
-class Ellipse(ShapeTemplate):
+class EllipsoidTemplate(ShapeTemplate):
     def __init__(self) -> None:
         super().__init__()
         self.Q = None
@@ -176,6 +176,9 @@ class Ellipse(ShapeTemplate):
     def adjust_shape(self, score_margin):
         self.score_margin = self.score_margin*(score_margin+1.0)
         #assert(self.score_margin >= 0)
+
+    def volume(self):
+        return np.pi/np.sqrt(np.linalg.det(self.Q/self.score_margin))
 
     def plot(self, ax, offset_coords=None, **kwargs):
         if self.Q.shape[0] == 3:
