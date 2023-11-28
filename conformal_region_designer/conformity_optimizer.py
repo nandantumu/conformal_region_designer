@@ -140,8 +140,8 @@ class ConformalRegionTimeSeries(ConformalRegion):
         scores = np.zeros((Z_cal.shape[0], self.timesteps))
         for i, cregion in enumerate(self.cregions):
             scores[:, i] = cregion.calculate_scores(Z_cal[:, i].reshape(Z_cal.shape[0], -1))*self.normalizing_constant[i]
-        real_scores = np.min(scores, axis=1)
-        ts_idx = np.argmin(scores, axis=1)
+        real_scores = np.max(scores, axis=1)
+        ts_idx = np.argmax(scores, axis=1)
         target_score = np.quantile(real_scores, conf_delta)
         if debug: print(f"Target score: {target_score}")
         for i, cregion in enumerate(self.cregions):
@@ -151,7 +151,7 @@ class ConformalRegionTimeSeries(ConformalRegion):
         scores = np.zeros((Z_test.shape[0], self.timesteps))
         for i, cregion in enumerate(self.cregions):
             scores[:, i] = cregion.calculate_scores(Z_test[:, i].reshape(Z_test.shape[0], -1))*self.normalizing_constant[i]
-        return np.min(scores, axis=1)
+        return np.max(scores, axis=1)
 
     def volume(self):
         return np.sum([cregion.volume() for cregion in self.cregions])

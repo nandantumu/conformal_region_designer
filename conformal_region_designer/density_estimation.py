@@ -179,7 +179,7 @@ class NoOpDensityEstimator(DensityEstimator):
     def __init__(self) -> None:
         super().__init__()
 
-    def fit(self, X):
+    def fit(self, X, delta):
         self.data = X
 
     def generate_points(self, delta) -> np.ndarray:

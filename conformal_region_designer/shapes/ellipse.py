@@ -3,6 +3,7 @@ import time
 
 import cma
 import gurobipy as gp
+from matplotlib import axis
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -12,28 +13,16 @@ PLOT_VALIDATION_TRACES = True
 NUM_VALID_TO_PLOT = 100
 
 
-def computeCPEllipseMatrixManyEllipse(residuals, Q_matrices, ellipse_centers, delta):
-    R_vals = [
-        min(
-            [
-                np.matmul(
-                    np.matmul(residuals[i] - ellipse_centers[j], Q_matrices[j]),
-                    residuals[i] - ellipse_centers[j],
-                )
-                for j in range(len(Q_matrices))
-            ]
-        )
-        for i in range(residuals.shape[0])
-    ]
+def ellipse_multiplier(X, Q, center):
+    return np.einsum('...i,ij,...j->...', X - center, Q, X - center, optimize='optimal')
 
-    R_vals.sort()
-    R_vals.append(max(R_vals))
-
-    ind_to_ret = min(math.ceil(len(R_vals) * (1 - delta)), len(R_vals) - 1)
-    return R_vals[ind_to_ret].item()
+def computeCPEllipseMatrixManyEllipse(residuals, Q_matrices, ellipse_centers):
+    R_vals = ellipse_multiplier(residuals, Q_matrices[0], ellipse_centers[0])
+    r_val_to_ret = np.max(R_vals)
+    return r_val_to_ret
 
 
-def callCMAESMatrixManyEllipse(residuals, delta, num_ellipse, ellipse_centers=None):
+def callCMAESMatrixManyEllipse(residuals, delta=1, num_ellipse=1, ellipse_centers=None):
     ## add in cma example
     dims = residuals.shape[1]
     args_cma = [residuals, delta, dims, num_ellipse, ellipse_centers]
@@ -64,7 +53,10 @@ def callCMAESMatrixManyEllipse(residuals, delta, num_ellipse, ellipse_centers=No
         x_0,
         sigma0,
         args=args_cma,
+        options={"verbose": -9},
+        
     )
+    
     end_time = time.time()
 
     Q_matrices = []
@@ -83,12 +75,10 @@ def callCMAESMatrixManyEllipse(residuals, delta, num_ellipse, ellipse_centers=No
         Q = np.matmul(x_temp.T, x_temp)
         Q_matrices.append(Q)
 
-    # print("cmaes soln: " + str(x))
-    print(Q_matrices)
-    print(ellipse_centers)
-    print("Soln time: " + str(end_time - start_time))
-
-    return Q_matrices, ellipse_centers
+    D_cp = computeCPEllipseMatrixManyEllipse(
+        residuals, Q_matrices, ellipse_centers
+    )
+    return Q_matrices, ellipse_centers, D_cp
 
 
 def objective_func_cma_es_ellipse_arbitrary_dim_multi_ellipse(x, *args):
@@ -134,7 +124,7 @@ def objective_func_cma_es_ellipse_arbitrary_dim_multi_ellipse(x, *args):
         Q_matrices.append(Q)
 
     D_cp = computeCPEllipseMatrixManyEllipse(
-        residuals, Q_matrices, ellipse_centers, delta
+        residuals, Q_matrices, ellipse_centers
     )
     ## what should the objective function be? sum of volumes? What if the ellipses overlap?
 
@@ -157,15 +147,13 @@ class EllipsoidTemplate(ShapeTemplate):
     def fit_shape(self, X):
         delta = 0.0
         num_ellipse = 1
-        self.Q, self.center = callCMAESMatrixManyEllipse(X, delta, num_ellipse)
+        center = X.mean(axis=0)
+        self.Q, self.center, self.score_margin = callCMAESMatrixManyEllipse(X, delta, num_ellipse)
         self.center = self.center[0]
         self.Q = self.Q[0]
-        self.score_margin = 1.0
 
-    def score_points(self, X):
-        score =  np.array(
-            [(x - self.center).T @ (self.Q/self.score_margin) @ (x - self.center) for x in X]
-        )
+    def score_points(self, X: np.ndarray):
+        score = ellipse_multiplier(X, self.Q/self.score_margin, self.center)
         assert(np.all(score >= 0))
         score = score - 1  # This is because the standard ellipse eq is leq 1.
         return score
