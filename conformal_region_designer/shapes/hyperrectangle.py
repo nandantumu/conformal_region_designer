@@ -14,10 +14,12 @@ class HyperrectangleTemplate(ShapeTemplate):
         """Create a hyperrectangle that encompasses all of the points in X"""
         self.min = np.min(X, axis=0)
         self.max = np.max(X, axis=0)
+        self.aspect_ratio = (self.max - self.min) / np.max(self.max - self.min)
 
     def score_points(self, X):
         """The score of a point is the distance to the nearest edge of the hyperrectangle"""
-        return np.maximum(X - self.max, self.min - X).max(axis=1)
+        score = np.maximum(X - self.max, self.min - X)*self.aspect_ratio
+        return score.max(axis=1)
 
     def conformalize(self, delta, calibration_data):
         """
@@ -40,51 +42,52 @@ class HyperrectangleTemplate(ShapeTemplate):
         """
         Plot the hyperrectangle in 2d and 3d
         """
+        pltargs = {"color": "black"}
+        pltargs.update(kwargs)
         if offset_coords is None:
             offset_coords = np.zeros(len(self.min))
         if len(self.min) == 2:
             ax.plot(
                 np.array([self.min[0], self.min[0], self.max[0], self.max[0], self.min[0]])+offset_coords[0],
                 np.array([self.min[1], self.max[1], self.max[1], self.min[1], self.min[1]])+offset_coords[1],
-                color="black",
-                **kwargs
+                **pltargs
             )
         elif len(self.min) == 3:
             ax.plot(
                 np.array([self.min[0], self.min[0], self.max[0], self.max[0], self.min[0]])+offset_coords[0],
                 np.array([self.min[1], self.max[1], self.max[1], self.min[1], self.min[1]])+offset_coords[1],
                 np.array([self.min[2], self.min[2], self.min[2], self.min[2], self.min[2]])+offset_coords[2],
-                color="black",
+                **pltargs
             )
             ax.plot(
                 np.array([self.min[0], self.min[0], self.max[0], self.max[0], self.min[0]])+offset_coords[0],
                 np.array([self.min[1], self.max[1], self.max[1], self.min[1], self.min[1]])+offset_coords[1],
                 np.array([self.max[2], self.max[2], self.max[2], self.max[2], self.max[2]])+offset_coords[2],
-                color="black",
+                **pltargs,
             )
             ax.plot(
                 np.array([self.min[0], self.min[0]])+offset_coords[0],
                 np.array([self.min[1], self.min[1]])+offset_coords[1],
                 np.array([self.min[2], self.max[2]])+offset_coords[2],
-                color="black",
+                **pltargs
             )
             ax.plot(
                 np.array([self.min[0], self.min[0]])+offset_coords[0],
                 np.array([self.max[1], self.max[1]])+offset_coords[1],
                 np.array([self.min[2], self.max[2]])+offset_coords[2],
-                color="black",
+                **pltargs
             )
             ax.plot(
                 np.array([self.max[0], self.max[0]])+offset_coords[0],
                 np.array([self.min[1], self.min[1]])+offset_coords[1],
                 np.array([self.min[2], self.max[2]])+offset_coords[2],
-                color="black",
+                **pltargs
             )
             ax.plot(
                 np.array([self.max[0], self.max[0]])+offset_coords[0],
                 np.array([self.max[1], self.max[1]])+offset_coords[1],
                 np.array([self.min[2], self.max[2]])+offset_coords[2],
-                color="black",
+                **pltargs
             )
         else:
             raise NotImplementedError(

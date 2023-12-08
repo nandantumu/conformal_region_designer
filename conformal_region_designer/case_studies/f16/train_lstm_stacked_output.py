@@ -51,8 +51,8 @@ def main():
     ## turn into multi dim arrays with the inputs and outputs
     # for now, just train on altitude and vertical velocity (as both inputs and outputs)
     # input_types = ['alt','vt','theta']
-    input_types = ["alt", "theta"]
-    output_types = ["alt", "theta"]
+    input_types = ["alt", "vt","theta"]
+    output_types = ["alt", "vt", "theta"]
 
     print("Num traces in dataset: " + str(len(all_data[input_types[0]])))
 

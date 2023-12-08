@@ -1,6 +1,6 @@
 from matplotlib.axes import Axes
 
-def set_square_aspect_ratio(ax: Axes):
+def set_square_aspect_ratio(ax: Axes, buffer: float = 0.0):
     ax.set_aspect('equal')
     x_min, x_max = ax.get_xlim()
     y_min, y_max = ax.get_ylim()

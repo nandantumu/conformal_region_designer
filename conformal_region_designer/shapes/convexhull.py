@@ -53,6 +53,8 @@ class ConvexHullTemplate(ShapeTemplate):
 
     def plot(self, ax, offset_coords=None, **kwargs):
         """Convert the halfspace equations to a halfspace intersection, and plot the vertices"""
+        pltargs = {'color': 'black'}
+        pltargs.update(kwargs)
         if offset_coords is None:
             offset_coords = np.zeros(self.hyp_a.shape[1])
         if self.hyp_a.shape[1] == 3:
@@ -70,4 +72,4 @@ class ConvexHullTemplate(ShapeTemplate):
             # Add the first vertex to the end to close the polygon
             vertices = np.vstack([vertices, vertices[0]])
             # Plot the vertices
-            ax.plot(vertices[:, 0]+offset_coords[0], vertices[:, 1]+offset_coords[1], color="black", **kwargs)
+            ax.plot(vertices[:, 0]+offset_coords[0], vertices[:, 1]+offset_coords[1], **pltargs)

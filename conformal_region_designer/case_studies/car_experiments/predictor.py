@@ -4,7 +4,7 @@ import jax.numpy as np
 import numpy as tnp
 
 class TrajectoryPredictor:
-    def __init__(self, dt, predict_steps: int=15):
+    def __init__(self, dt, predict_steps: int=50):
         self.dt = dt
         self.steps = predict_steps
     

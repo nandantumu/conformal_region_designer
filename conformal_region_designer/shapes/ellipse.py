@@ -169,6 +169,8 @@ class EllipsoidTemplate(ShapeTemplate):
         return np.pi/np.sqrt(np.linalg.det(self.Q/self.score_margin))
 
     def plot(self, ax, offset_coords=None, **kwargs):
+        pltargs = {"color": "black"}
+        pltargs.update(kwargs)
         if self.Q.shape[0] == 3:
             raise NotImplementedError("3d plotting not implemented yet")
         else:
@@ -186,7 +188,6 @@ class EllipsoidTemplate(ShapeTemplate):
             ax.plot(
                 ellipsis[0, :] + self.center[0] + offset_coords[0],
                 ellipsis[1, :] + self.center[1] + offset_coords[1],
-                color="black",
-                **kwargs
+                **pltargs
             )
 
