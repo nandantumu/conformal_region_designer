@@ -10,10 +10,10 @@ classifiers = [
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
 ]
+homepage = "https://github.com/nandantumu/conformal_region_designer"
 
-[project.urls]
-Homepage = "https://github.com/nandantumu/conformal_region_designer"
-Issues = "https://github.com/nandantumu/conformal_region_designer/issues"
+[tool.poetry.urls]
+"Issues" = "https://github.com/nandantumu/conformal_region_designer/issues"
 
 [tool.poetry.dependencies]
 python = ">=3.8"
