@@ -126,6 +126,17 @@ class ConformalRegion:
     
     def volume(self):
         return np.sum([shape.volume() for shape in self.shapes])
+    
+    def plot(self, ax, offset_coords=None, **kwargs):
+        """
+        Plot the shapes in 2d and 3d
+        """
+        pltargs = {"color": "black"}
+        pltargs.update(kwargs)
+        if offset_coords is None:
+            offset_coords = np.zeros(len(self.shapes[0].min))
+        for shape in self.shapes:
+            shape.plot(ax, offset_coords, **pltargs)
 
 
 class ConformalRegionTimeSeries(ConformalRegion):
