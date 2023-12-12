@@ -24,6 +24,11 @@ seaborn = "^0.13.0"
 cma = "^3.3.0"
 statsmodels = "^0.14.0"
 
+jax = {extras = ["cpu"], version = "^0.4.20", optional = true}
+gurobipy = {version = "^10.0.3", optional = true}
+
+[tool.poetry.extras]
+demos = ["jax", "gurobipy"]
 
 [tool.poetry.group.dev.dependencies]
 jupyter = "^1.0.0"
@@ -35,7 +40,6 @@ jupyterlab = "^4.0.9"
 
 
 [tool.poetry.group.demos.dependencies]
-hurdat2parser = "^2.2.3.1"
 jax = {extras = ["cpu"], version = "^0.4.20"}
 gurobipy = "^10.0.3"
 
