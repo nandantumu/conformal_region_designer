@@ -1,9 +1,19 @@
 [tool.poetry]
-name = "conformal-region-designer"
-version = "0.1.0"
+name = "conformal_region_designer"
+version = "0.1.1"
 description = "Creates intelligently shaped conformal prediction regions that respect multimodality and convexity."
 authors = ["Nandan Tumu <nandant@seas.upenn.edu>", "Matthew Cleaveland <mcleav@seas.upenn.edu>"]
 readme = "README.md"
+requires = {python = ">=3.8"}
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+Homepage = "https://github.com/nandantumu/conformal_region_designer"
+Issues = "https://github.com/nandantumu/conformal_region_designer/issues"
 
 [tool.poetry.dependencies]
 python = ">=3.10,<3.13"
