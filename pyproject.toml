@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "conformal_region_designer"
-version = "0.1.1"
+version = "0.1.2"
 description = "Creates intelligently shaped conformal prediction regions that respect multimodality and convexity."
 authors = ["Nandan Tumu <nandant@seas.upenn.edu>", "Matthew Cleaveland <mcleav@seas.upenn.edu>"]
 readme = "README.md"
