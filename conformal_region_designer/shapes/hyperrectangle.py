@@ -10,10 +10,10 @@ class HyperrectangleTemplate(ShapeTemplate):
         self.min = None
         self.max = None
 
-    def fit_shape(self, X):
+    def fit_shape(self, Z_cal_one):
         """Create a hyperrectangle that encompasses all of the points in X"""
-        self.min = np.min(X, axis=0)
-        self.max = np.max(X, axis=0)
+        self.min = np.min(Z_cal_one, axis=0)
+        self.max = np.max(Z_cal_one, axis=0)
         self.aspect_ratio = (self.max - self.min) / np.max(self.max - self.min)
 
     def score_points(self, X):
@@ -21,11 +21,15 @@ class HyperrectangleTemplate(ShapeTemplate):
         score = np.maximum(X - self.max, self.min - X)*self.aspect_ratio
         return score.max(axis=1)
 
-    def conformalize(self, delta, calibration_data):
+    def conformalize(self, delta, Z_cal_two):
         """
         Find the score of the calibration data
+
+        Keyword arguments:
+        delta -- the desired coverage level
+        calibration_data -- the data to be used for calibration
         """
-        scores = self.score_points(calibration_data)
+        scores = self.score_points(Z_cal_two)
         inflation = np.quantile(scores, conformalized_quantile(len(scores), delta))
         self.min -= inflation
         self.max += inflation
@@ -51,7 +55,7 @@ class HyperrectangleTemplate(ShapeTemplate):
                 np.array([self.min[0], self.min[0], self.max[0], self.max[0], self.min[0]])+offset_coords[0],
                 np.array([self.min[1], self.max[1], self.max[1], self.min[1], self.min[1]])+offset_coords[1],
                 **pltargs
-            )
+            ) 
         elif len(self.min) == 3:
             ax.plot(
                 np.array([self.min[0], self.min[0], self.max[0], self.max[0], self.min[0]])+offset_coords[0],

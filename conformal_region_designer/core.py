@@ -46,15 +46,15 @@ class Clustering(ABC):
 class ShapeTemplate(ABC):
     """Given a set of points, generate a convex hull around those points"""
 
-    def fit_shape(self, X):
+    def fit_shape(self, Z_cal_one):
         """Create convex shape to encompass all of the points in X"""
         pass
 
-    def score_points(self, X):
+    def score_points(self, Z):
         """Given a set of points, score them"""
         pass
 
-    def conformalize(self, delta, calibration_data):
+    def conformalize(self, delta, Z_cal_two):
         """Given a convex hull, return a convex set that has weight at least delta
         {x: p(x)>delta}
         """
@@ -63,6 +63,10 @@ class ShapeTemplate(ABC):
     def adjust_shape(self, score_margin):
         """Adjust the shape (inflate or deflate) based on the score margin"""
         pass
+
+    def volume(self):
+        """Return the volume of the shape"""
+        raise NotImplementedError
 
     def plot(self, ax, offset_coords=None):
         """Plot the shape"""
