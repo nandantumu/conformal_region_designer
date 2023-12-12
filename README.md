@@ -9,7 +9,7 @@ Welcome to the Conformal Region Designer package! This package provides a set of
 To install the Conformal Region Designer package, you can use pip:
 
 ```bash
-pip install conformal_region_designer
+pip install conformal-region-designer
 ```
 
 ## Usage
