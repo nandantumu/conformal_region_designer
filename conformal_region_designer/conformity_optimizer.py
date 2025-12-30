@@ -2,6 +2,7 @@
 This file contains an implementation of the overall orchestrator that creates regions.
 
 """
+
 from copy import deepcopy
 from typing import Union
 import numpy as np
@@ -13,52 +14,64 @@ from .utils import conformalized_quantile
 
 class ConformalRegion:
     def __init__(
-        self, 
-        de: Union[DensityEstimator, str] = 'kde', 
-        cl: Union[Clustering, str] = 'meanshift', 
-        st: Union[type[ShapeTemplate], str] = 'hyperrectangle', 
-        delta=0.95
+        self,
+        de: Union[DensityEstimator, str] = "mckde",
+        cl: Union[Clustering, str] = "meanshift",
+        st: Union[type[ShapeTemplate], str] = "hyperrectangle",
+        delta=0.95,
     ) -> None:
         if isinstance(de, str):
-            if de == 'kde':
+            if de == "kde":
                 from .density_estimation import KDE
+
                 de = KDE()
+            elif de == "mckde":
+                from .density_estimation import MCKDE
+
+                de = MCKDE()
             else:
                 raise ValueError(f"Unknown density estimator {de}")
         self.de = de
         if isinstance(cl, str):
-            if cl == 'meanshift':
+            if cl == "meanshift":
                 from .clustering import MeanShiftClustering
+
                 cl = MeanShiftClustering()
             else:
                 raise ValueError(f"Unknown clustering algorithm {cl}")
         self.cl = cl
         if isinstance(st, str):
-            if st == 'hyperrectangle':
+            if st == "hyperrectangle":
                 from .shapes import HyperrectangleTemplate
+
                 st = HyperrectangleTemplate
-            elif st == 'convexhull':
+            elif st == "convexhull":
                 from .shapes import ConvexHullTemplate
+
                 st = ConvexHullTemplate
-            elif st == 'ellipse':
+            elif st == "ellipse":
                 from .shapes import EllipsoidTemplate
+
                 st = EllipsoidTemplate
             else:
                 raise ValueError(f"Unknown shape template {st}")
         self.st = st
         self.delta = delta
 
-    def fit(self, Z_cal_one: np.ndarray, verbose: bool=False):
+    def fit(self, Z_cal_one: np.ndarray, verbose: bool = False):
         de_start = time()
-        self.de.fit(Z_cal_one, self.delta)
-        if verbose: print("Generating density points")
+        self.de.fit(Z_cal_one)
+        if verbose:
+            print("Generating density points")
         self.density_points = self.de.generate_points(self.delta)
         de_end = time()
-        if verbose: print("Fitting Clusters")
+        if verbose:
+            print("Fitting Clusters")
         self.cl.fit(self.density_points)
         self.clusters = self.cl.generate_clustered_points(self.density_points)
         cl_end = time()
-        if verbose: print("Fitting Shapes")
+        if verbose:
+            print("Fitting Shapes")
         self.shapes = [self.st() for _ in range(len(self.clusters))]
         for shape, cluster in zip(self.shapes, self.clusters):
             shape.fit_shape(cluster)
@@ -70,7 +83,9 @@ class ConformalRegion:
         real_scores = np.min(scores, axis=0)
         shape_idx = np.argmin(scores, axis=0)
         # For each shape compute the max score of the points assigned to it
-        self.normalizing_constant = 1 /(1e-8 + np.quantile(scores, self.delta, axis=1) - np.min(scores, axis=1))
+        self.normalizing_constant = 1 / (
+            1e-8 + np.quantile(scores, self.delta, axis=1) - np.min(scores, axis=1)
+        )
         # self.normalizing_constant = self.normalizing_constant/np.sum(self.normalizing_constant)
         # np.ones(len(self.shapes))
         # self.cal_bound = np.ones(len(self.shapes))
@@ -93,15 +108,16 @@ class ConformalRegion:
         conf_delta = conformalized_quantile(len(Z_cal_two), self.delta)
         scores = np.zeros((len(self.shapes), Z_cal_two.shape[0]))
         for i, shape in enumerate(self.shapes):
-            scores[i] = shape.score_points(Z_cal_two)*self.normalizing_constant[i]
+            scores[i] = shape.score_points(Z_cal_two) * self.normalizing_constant[i]
         real_scores = np.min(scores, axis=0)
         shape_idx = np.argmin(scores, axis=0)
         target_score = np.quantile(real_scores, conf_delta)
-        if debug: print(f"Target score: {target_score}")
+        if debug:
+            print(f"Target score: {target_score}")
         self.adjust_shapes(target_score)
         end_time = time()
         self.conformalize_time = end_time - start_time
-    
+
     def print_times(self):
         """Print the times for each step of the process"""
         print(f"DE time             : {self.de_time}")
@@ -110,23 +126,27 @@ class ConformalRegion:
         print(f"Score time          : {self.score_time}")
         try:
             print(f"Conformalize time   : {self.conformalize_time}")
-            print(f"Total time          : {self.de_time + self.cl_time + self.st_time + self.score_time + self.conformalize_time}")
+            print(
+                f"Total time          : {self.de_time + self.cl_time + self.st_time + self.score_time + self.conformalize_time}"
+            )
         except:
-            print(f"Total time          : {self.de_time + self.cl_time + self.st_time + self.score_time}")
+            print(
+                f"Total time          : {self.de_time + self.cl_time + self.st_time + self.score_time}"
+            )
 
     def adjust_shapes(self, target_score: float):
         for i, shape in enumerate(self.shapes):
-            shape.adjust_shape(target_score/self.normalizing_constant[i])
+            shape.adjust_shape(target_score / self.normalizing_constant[i])
 
     def calculate_scores(self, Z_test: np.ndarray):
         scores = np.zeros((len(self.shapes), Z_test.shape[0]))
         for i, shape in enumerate(self.shapes):
-            scores[i] = shape.score_points(Z_test)*self.normalizing_constant[i]
+            scores[i] = shape.score_points(Z_test) * self.normalizing_constant[i]
         return np.min(scores, axis=0)
-    
+
     def volume(self):
         return np.sum([shape.volume() for shape in self.shapes])
-    
+
     def plot(self, ax, offset_coords=None, **kwargs):
         """
         Plot the shapes in 2d and 3d
@@ -145,30 +165,38 @@ class ConformalRegionTimeSeries(ConformalRegion):
     It does so by fitting a ConformalRegion to each timestep of the data, and then
     using a normalizing constant over each of the timesteps to achieve timeseries regions
     """
+
     def __init__(
-        self, 
+        self,
         timesteps: int,
-        de: Union[DensityEstimator, str] = 'kde', 
-        cl: Union[Clustering, str] = 'meanshift', 
-        st: Union[type[ShapeTemplate], str] = 'hyperrectangle', 
-        delta=0.95
+        de: Union[DensityEstimator, str] = "kde",
+        cl: Union[Clustering, str] = "meanshift",
+        st: Union[type[ShapeTemplate], str] = "hyperrectangle",
+        delta=0.95,
     ) -> None:
         self.cregions = [ConformalRegion(de, cl, st, delta) for _ in range(timesteps)]
         self.timesteps = timesteps
         self.delta = delta
 
-    def fit(self, Z_cal_one: np.ndarray, verbose: bool=False):
+    def fit(self, Z_cal_one: np.ndarray, verbose: bool = False):
         for i, cregion in enumerate(self.cregions):
-            if verbose: print(f"Fitting timestep {i}")
-            cregion.fit(Z_cal_one[:, i].reshape(Z_cal_one.shape[0], -1), verbose=verbose)
+            if verbose:
+                print(f"Fitting timestep {i}")
+            cregion.fit(
+                Z_cal_one[:, i].reshape(Z_cal_one.shape[0], -1), verbose=verbose
+            )
         scores = np.zeros((Z_cal_one.shape[0], self.timesteps))
         for i, cregion in enumerate(self.cregions):
-            scores[:, i] = cregion.calculate_scores(Z_cal_one[:, i].reshape(Z_cal_one.shape[0], -1))
+            scores[:, i] = cregion.calculate_scores(
+                Z_cal_one[:, i].reshape(Z_cal_one.shape[0], -1)
+            )
         real_scores = np.min(scores, axis=1)
         ts_idx = np.argmin(scores, axis=1)
-        self.time_normalizing_constant = 1/(1e-8 + np.quantile(scores, self.delta, axis=1) - np.min(scores, axis=1))
+        self.time_normalizing_constant = 1 / (
+            1e-8 + np.quantile(scores, self.delta, axis=1) - np.min(scores, axis=1)
+        )
         # self.time_normalizing_constant = self.time_normalizing_constant/np.sum(self.time_normalizing_constant)
-        
+
         # cal_one_bounds = np.ones(self.timesteps)
         # cal_one_mins = np.zeros(self.timesteps)
         # for i in range(self.timesteps):
@@ -199,24 +227,36 @@ class ConformalRegionTimeSeries(ConformalRegion):
         conf_delta = conformalized_quantile(len(Z_cal_two), self.delta)
         scores = np.zeros((Z_cal_two.shape[0], self.timesteps))
         for i, cregion in enumerate(self.cregions):
-            scores[:, i] = cregion.calculate_scores(Z_cal_two[:, i].reshape(Z_cal_two.shape[0], -1))*self.time_normalizing_constant[i]
+            scores[:, i] = (
+                cregion.calculate_scores(
+                    Z_cal_two[:, i].reshape(Z_cal_two.shape[0], -1)
+                )
+                * self.time_normalizing_constant[i]
+            )
         real_scores = np.max(scores, axis=1)
         ts_idx = np.argmax(scores, axis=1)
         target_score = np.quantile(real_scores, conf_delta)
-        if debug: print(f"Target score: {target_score}")
+        if debug:
+            print(f"Target score: {target_score}")
         for i, cregion in enumerate(self.cregions):
-            cregion.adjust_shapes(target_score/self.time_normalizing_constant[i])
-    
+            cregion.adjust_shapes(target_score / self.time_normalizing_constant[i])
+
     def calculate_scores(self, Z_test: np.ndarray):
         scores = np.zeros((Z_test.shape[0], self.timesteps))
         for i, cregion in enumerate(self.cregions):
-            scores[:, i] = cregion.calculate_scores(Z_test[:, i].reshape(Z_test.shape[0], -1))*self.time_normalizing_constant[i]
+            scores[:, i] = (
+                cregion.calculate_scores(Z_test[:, i].reshape(Z_test.shape[0], -1))
+                * self.time_normalizing_constant[i]
+            )
         return np.max(scores, axis=1)
 
     def volume(self):
         return np.sum([cregion.volume() for cregion in self.cregions])
-    
+
     @property
     def shapes(self):
         import itertools
-        return list(itertools.chain.from_iterable([cregion.shapes for cregion in self.cregions]))
+
+        return list(
+            itertools.chain.from_iterable([cregion.shapes for cregion in self.cregions])
+        )
