@@ -164,9 +164,9 @@ class ConformalRegionTimeSeries(ConformalRegion):
         scores = np.zeros((Z_cal_one.shape[0], self.timesteps))
         for i, cregion in enumerate(self.cregions):
             scores[:, i] = cregion.calculate_scores(Z_cal_one[:, i].reshape(Z_cal_one.shape[0], -1))
-        real_scores = np.min(scores, axis=1)
-        ts_idx = np.argmin(scores, axis=1)
-        self.time_normalizing_constant = 1/(1e-8 + np.quantile(scores, self.delta, axis=1) - np.min(scores, axis=1))
+        #real_scores = np.min(scores, axis=1)
+        #ts_idx = np.argmin(scores, axis=1)
+        self.time_normalizing_constant = 1/(1e-8 + np.quantile(scores, self.delta, axis=0) - np.min(scores, axis=0))
         # self.time_normalizing_constant = self.time_normalizing_constant/np.sum(self.time_normalizing_constant)
         
         # cal_one_bounds = np.ones(self.timesteps)
